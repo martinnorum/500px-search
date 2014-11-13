@@ -2,7 +2,7 @@
   "name": "500px-search",
   "version": "1.0.0",
   "description": "500px-search ============",
-  "main": "index.js",
+  "main": "",
   "dependencies": {},
   "devDependencies": {
     "connect": "^3.3.3",
@@ -20,6 +20,7 @@
     "gulp-rename": "^1.2.0",
     "gulp-ruby-sass": "^0.7.1",
     "gulp-uglify": "^1.0.1",
+    "http": "0.0.0",
     "opn": "^1.0.0",
     "serve-index": "^1.5.0",
     "serve-static": "^1.7.1"

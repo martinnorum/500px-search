@@ -10,7 +10,8 @@ var gulp = require('gulp'),
     notify = require('gulp-notify'),
     cache = require('gulp-cache'),
     livereload = require('gulp-livereload'),
-    del = require('del');
+    del = require('del'),
+    dest = 'build';
 
 
 // SASS
@@ -20,12 +21,12 @@ gulp.task('styles', function() {
             style: 'expanded'
         }))
         .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))
-        .pipe(gulp.dest('dist/assets/css'))
+        .pipe(gulp.dest(dest + '/css'))
         .pipe(rename({
             suffix: '.min'
         }))
         .pipe(minifycss())
-        .pipe(gulp.dest('dist/assets/css'))
+        .pipe(gulp.dest(dest + '/css'))
         .pipe(notify({
             message: 'Styles task complete'
         }));
@@ -37,12 +38,12 @@ gulp.task('scripts', function() {
         .pipe(jshint('.jshintrc'))
         .pipe(jshint.reporter('default'))
         .pipe(concat('main.js'))
-        .pipe(gulp.dest('dist/assets/js'))
+        .pipe(gulp.dest(dest + '/js'))
         .pipe(rename({
             suffix: '.min'
         }))
         .pipe(uglify())
-        .pipe(gulp.dest('dist/assets/js'))
+        .pipe(gulp.dest(dest + '/js'))
         .pipe(notify({
             message: 'Scripts task complete'
         }));
@@ -56,15 +57,21 @@ gulp.task('images', function() {
             progressive: true,
             interlaced: true
         })))
-        .pipe(gulp.dest('dist/assets/img'))
+        .pipe(gulp.dest(dest + '/img'))
         .pipe(notify({
             message: 'Images task complete'
         }));
 });
 
+// HTML
+gulp.task('html', function(){
+    return gulp.src('src/*.html')
+        .pipe(gulp.dest(dest));
+});
+
 // CLEAN
 gulp.task('clean', function(cb) {
-    del(['dist/assets/css', 'dist/assets/js', 'dist/assets/img'], cb)
+    del(['build', ''], cb);
 });
 
 // CONNECT
@@ -76,49 +83,33 @@ gulp.task('connect', function() {
         .use(require('connect-livereload')({
             port: 35729
         }))
-        .use(serveStatic('dist'))
-        .use(serveIndex('dist'));
+        .use(serveStatic(dest))
+        .use(serveIndex(dest));
 
     require('http').createServer(app)
-        .listen(9000)
+        .listen(3000)
         .on('listening', function() {
-            console.log('Started connect web server on http://localhost:9000');
+            console.log('Started connect web server on http://localhost:3000');
         });
 });
 
 //SERVER
-gulp.task('serve', ['connect', 'styles'], function() {
+gulp.task('serve', ['connect', 'build'], function() {
     var livereload = require('gulp-livereload');
 
     livereload.listen();
 
-    // require('opn')('http://localhost:9000', 'firefox');
+    // require('opn')('http://localhost:3000', 'FirefoxDeveloperEdition');
 
-    // Watch .scss files
     gulp.watch('src/styles/**/*.scss', ['styles']);
-
-    // Watch .js files
     gulp.watch('src/scripts/**/*.js', ['scripts']);
-
-    // Watch image files
     gulp.watch('src/images/**/*', ['images']);
-
-    // Watch any files in dist/, reload on change
-    gulp.watch(['dist/**']).on('change', livereload.changed);
-    // watch for changes
-    // gulp.watch([
-    //     'app/*.html',
-    //     '.tmp/styles/**/*.css',
-    //     'app/scripts/**/*.js',
-    //     'app/images/**/*'
-    // ]).on('change', livereload.changed);
-
-    // gulp.watch('app/scss/**/*.scss', ['sass']);
-    // gulp.watch('bower.json', ['wiredep']);
+    gulp.watch('src/**/*.html', ['html']);
+    gulp.watch([dest + '/**']).on('change', livereload.changed);
 });
 
 // DEAFULT
-gulp.task('build', ['styles', 'scripts', 'images']);
+gulp.task('build', ['styles', 'scripts', 'images', 'html']);
 gulp.task('default', ['clean'], function() {
     gulp.start('build');
 });
