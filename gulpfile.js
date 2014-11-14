@@ -18,15 +18,16 @@ var gulp = require('gulp'),
     handlebars = require('gulp-handlebars'),
     wrap = require('gulp-wrap'),
     defineModule = require('gulp-define-module'),
+    processhtml = require('gulp-processhtml'),
     declare = require('gulp-declare');
-    
+
 
 var dest = './build';
 
 
 // SASS
 gulp.task('styles', function() {
-    return gulp.src('src/styles/app.scss')
+    return gulp.src('src/styles/*.scss')
         .pipe(sass({
             style: 'expanded'
         }))
@@ -59,7 +60,22 @@ gulp.task('images', function() {
 // HTML
 gulp.task('html', function() {
     return gulp.src('src/*.html')
-        .pipe(gulp.dest(dest));
+        .pipe(gulp.dest(dest))
+        .pipe(notify({
+            message: 'HTML task complete'
+        }));
+});
+
+// PROCESS HTML
+gulp.task('processhtml', ['styles', 'scripts', 'html'], function() {
+    gulp.src('build/index.html')
+        .pipe(processhtml({
+
+        }))
+        .pipe(gulp.dest(dest))
+        .pipe(notify({
+            message: 'Process html task complete'
+        }));
 });
 
 // CLEAN
@@ -68,11 +84,14 @@ gulp.task('clean', function(cb) {
 });
 
 // TEMPLATES
-gulp.task('templates', function(){
-  gulp.src('src/templates/*.hbs')
-    .pipe(handlebars())
-    .pipe(defineModule('node'))
-    .pipe(gulp.dest('src/scripts/templates/'));
+gulp.task('templates', function() {
+    gulp.src('src/templates/*.hbs')
+        .pipe(handlebars())
+        .pipe(defineModule('node'))
+        .pipe(gulp.dest('src/scripts/templates/'))
+        .pipe(notify({
+            message: 'Templates task complete'
+        }));
 });
 
 // BROWSERIFY
@@ -88,8 +107,10 @@ gulp.task('scripts', ['templates'], function() {
             suffix: '.min'
         }))
         .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-            .pipe(uglify())
+        .pipe(sourcemaps.init({
+            loadMaps: true
+        }))
+        .pipe(uglify())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(dest + '/scripts'))
         .pipe(notify({
@@ -125,15 +146,15 @@ gulp.task('serve', ['connect', 'build'], function() {
 
     // require('opn')('http://localhost:3000', 'FirefoxDeveloperEdition');
 
-    gulp.watch('src/styles/**/*.scss', ['styles']);
-    gulp.watch(['src/scripts/**/*.js', 'src/templates/**/*.hbs'], ['scripts']);
+    gulp.watch('src/styles/**/*.scss', ['processhtml']);
+    gulp.watch(['src/scripts/**/*.js', 'src/templates/**/*.hbs'], ['processhtml']);
     gulp.watch('src/images/**/*', ['images']);
     gulp.watch('src/**/*.html', ['html']);
     gulp.watch([dest + '/**']).on('change', livereload.changed);
 });
 
 // DEAFULT
-gulp.task('build', ['styles', 'scripts', 'images', 'html']);
+gulp.task('build', ['images', 'processhtml']);
 gulp.task('default', ['clean'], function() {
     gulp.start('build');
 });
