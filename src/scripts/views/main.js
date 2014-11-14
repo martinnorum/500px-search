@@ -1,14 +1,15 @@
 var View = require('ampersand-view');
-var template = require('../templates/main.js');
 
 
 module.exports = View.extend({
-    template: template,
+    template: require('../templates/main.js'),
     initialize: function () {
     },
     render: function (){
     	// main renderer
-        this.renderWithTemplate({me: me});
+        // this.el = template();
+        console.log(this.model.fullName);
+        this.renderWithTemplate(this.model);
 
         return this;
     }

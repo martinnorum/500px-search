@@ -19,7 +19,10 @@ module.exports = {
         var self = window.app = this;
 
         // create our global 'me' object and an empty collection for our people models.
-        window.me = new Me();
+        window.me = new Me({
+            firstName: 'Phil',
+            lastName: 'Roberts'
+        });
         // this.people = new People();
 
         // // init our URL handlers and the history tracker
@@ -28,7 +31,6 @@ module.exports = {
         // // wait for document ready to render our main view
         // // this ensures the document has a body, etc.
         domReady(function() {
-            console.log('dom ready');
             //     // init our main view
             var mainView = self.view = new MainView({
                 model: me,
